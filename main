@@ -1,0 +1,163 @@
+from BTB.kiwoom import *
+import time
+import datetime
+
+########################################################################################################################
+
+# 매수 프로토콜
+def buyst():
+
+  for i in code1:
+
+    if i not in stop:
+
+      df = kiwoom.GetMasterLastPrice(i)
+      p = round(500000 / df)
+
+      kiwoom.SendOrder("시장가매수", "0101", stock_account, 1, i, p, 0, "03", "")
+
+      name = kiwoom.GetMasterCodeName(i)
+      time.sleep(1)
+
+# 매도 프로토콜
+def Esellst():
+
+  for i in code3:
+
+    try:
+      p = int((sorted[(sorted['종목번호'] == 'A' + i)])['보유수량'].values[0])
+    except:
+      continue
+
+    kiwoom.SendOrder("시장가매도", "0101", stock_account, 2, i, p, 0, "03", "")
+
+    name = kiwoom.GetMasterCodeName(i)
+    time.sleep(1)
+
+def sellst1():
+
+  for i in code2:
+
+    try:
+      p = int((sorted[(sorted['종목번호'] == 'A' + i)])['보유수량'].values[0])
+    except:
+      continue
+
+    kiwoom.SendOrder("시장가매도", "0101", stock_account, 2, i, p, 0, "03", "")
+
+    stop.append(i)
+    name = kiwoom.GetMasterCodeName(i)
+    time.sleep(0.2)
+
+def sellst2():
+
+  for i in code4:
+
+    try:
+      p = int((sorted[(sorted['종목번호'] == 'A' + i)])['보유수량'].values[0])
+    except:
+      continue
+
+    kiwoom.SendOrder("시장가매도", "0101", stock_account, 2, i, p, 0, "03", "")
+
+    stop.append(i)
+    name = kiwoom.GetMasterCodeName(i)
+    time.sleep(0.2)
+
+def sellst3():
+
+  for i in code5:
+
+    try:
+      p = int((sorted[(sorted['종목번호'] == 'A' + i)])['보유수량'].values[0])
+    except:
+      continue
+
+    kiwoom.SendOrder("시장가매도", "0101", stock_account, 2, i, p, 0, "03", "")
+
+    stop.append(i)
+    name = kiwoom.GetMasterCodeName(i)
+    time.sleep(0.2)
+
+########################################################################################################################
+
+# 로그인
+kiwoom = Kiwoom()
+kiwoom.CommConnect(block=True)
+
+# 주식계좌 로드
+accounts = kiwoom.GetLoginInfo("ACCNO")
+stock_account = accounts[0]
+
+# 잔고 엑셀 세이브
+dff = kiwoom.block_request("opw00018",
+                          계좌번호=stock_account,
+                          비밀번호="",
+                          비밀번호입력매체구분="00",
+                          조회구분=2,
+                          output="계좌평가잔고개별합산",
+                          next=0)
+
+# 잔고 정렬
+sorted = dff.sort_values(by ='종목번호')
+
+# 추가매수 금지 매도 리스트
+stop = []
+
+########################################################################################################################
+
+# Main 코드
+while True:
+
+  # 시간 로드
+  ho = datetime.datetime.today().hour
+  mi = datetime.datetime.today().minute
+
+  # 조건식 로드
+  kiwoom.GetConditionLoad()
+  conditions = kiwoom.GetConditionNameList()
+
+  condition_index1, TBB = conditions[0]
+  condition_index2, TBS1 = conditions[1]
+  condition_index3, TBES = conditions[2]
+  condition_index4, TBS2 = conditions[3]
+  condition_index5, TBS3 = conditions[4]
+
+
+# 최종 거래 실행
+  if (ho == 15 and mi >= 20):
+
+    code1 = kiwoom.SendCondition("0101", TBB, condition_index1, 0)
+    code3 = kiwoom.SendCondition("0101", TBES, condition_index3, 0)
+
+    Esellst()
+    buyst()
+    break
+
+# 거래 실행 (1/3)
+  if not (ho == 15 and mi >= 20):
+
+    code2 = kiwoom.SendCondition("0101", TBS1, condition_index2, 0)
+
+    print(ho,':',mi)
+    sellst1()
+
+    time.sleep(20)
+
+# 거래 실행 (2/3)
+  if not (ho == 15 and mi >= 20):
+
+    code4 = kiwoom.SendCondition("0101", TBS2, condition_index4, 0)
+
+    sellst2()
+
+    time.sleep(20)
+
+# 거래 실행 (3/3)
+  if not (ho == 15 and mi >= 20):
+
+    code5 = kiwoom.SendCondition("0101", TBS3, condition_index5, 0)
+
+    sellst3()
+
+    time.sleep(20)
