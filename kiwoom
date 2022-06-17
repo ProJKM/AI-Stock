@@ -1,0 +1,11 @@
+from 'https://github.com/sharebook-kr/pykiwoom'
+
+
+(추가) 사용시 로그인 화면 강제
+    def _handler_login(self, err_code):
+        logging.info(f"hander login {err_code}")
+### (추가) 사용시 로그인 화면 강제
+        #self.ocx.dynamicCall("KOA_Functions(QString, QString)", "ShowAccountWindow", "")
+###
+        if err_code == 0:
+            self.connected = True
